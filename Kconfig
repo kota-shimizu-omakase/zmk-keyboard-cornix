@@ -1,0 +1,4 @@
+config CORNIX_HUD
+    bool "Push layer and BLE profile state to the cornix-hud companion over raw HID"
+    depends on RAW_HID
+    default y

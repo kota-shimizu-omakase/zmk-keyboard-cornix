@@ -3,6 +3,7 @@
 ---
 include:
   - board: cornix_left//zmk
+    shield: raw_hid_adapter
     artifact-name: cornix_left_default_nosd
 
   - board: cornix_right//zmk
