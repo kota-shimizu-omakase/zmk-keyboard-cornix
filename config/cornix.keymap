@@ -2,8 +2,10 @@
  * Cornix keymap matching the stock Jezail Funder firmware (the printed keycap
  * legends), ported from a Vial dump of the stock RMK build.
  *
- * Stock RMK used KC_NO on every unassigned upper-layer key, not transparent,
- * so this does too. Mute (left knob press) and middle click (right knob press)
+ * Stock RMK used KC_NO on every unassigned upper-layer key, and so does this,
+ * except the left-hand modifiers (Shift, Ctrl, Cmd, Alt), which are
+ * transparent wherever they are free so Shift can follow a held layer key.
+ * Mute (left knob press) and middle click (right knob press)
  * sit on every layer, as they did in stock.
  *
  * Position order follows default_transform in the board's cornix-layouts.dtsi:
