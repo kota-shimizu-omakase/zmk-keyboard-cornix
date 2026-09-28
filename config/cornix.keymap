@@ -7,7 +7,8 @@
  * (a key on the same half resolves as tap, decided on its release),
  * flow tap with 120 ms prior idle. RMK had no quick-tap, so none here.
  *
- * Layer 3 (BT) has no key reaching it, exactly as in the original.
+ * Layer 3 (BT) had no key reaching it in the original; here it is active
+ * while the right-thumb Del+Esc combo is held.
  *
  * Position order follows default_transform in cornix-layouts.dtsi: left half,
  * then right half; row 2 carries the two knob presses between the halves.
@@ -22,6 +23,7 @@
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
+#include <behaviors/rgbled_widget.dtsi>
 
 #define KEYS_L 0 1 2 3 4 5 12 13 14 15 16 17 24 25 26 27 28 29 30 38 39 40 41 42 43
 #define KEYS_R 6 7 8 9 10 11 18 19 20 21 22 23 31 32 33 34 35 36 37 44 45 46 47 48 49
@@ -71,6 +73,18 @@
         };
     };
 
+    combos {
+        compatible = "zmk,combos";
+        // Hold Del+Esc (right thumb) for the BT layer; 50 ms like RMK's combo timeout.
+        combo_bt_layer {
+            key-positions = <48 49>;
+            bindings = <&mo 3>;
+            timeout-ms = <50>;
+            require-prior-idle-ms = <120>;
+            layers = <0>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -111,7 +125,7 @@
             display-name = "BT";
             bindings = <
 &none         &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
-&bt BT_SEL 0  &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
+&bt BT_SEL 0  &ind_bat      &ind_con      &none         &none         &none          &none         &none         &none         &none         &none         &none
 &bt BT_SEL 1  &none         &none         &none         &none         &none          &kp C_MUTE    &mkp MCLK      &none         &none         &none         &none         &none         &none
 &bt BT_SEL 2  &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
             >;
