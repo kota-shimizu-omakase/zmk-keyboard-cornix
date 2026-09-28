@@ -30,11 +30,15 @@
 
 / {
     behaviors {
+        // One wheel click per detent. &msc sends speed * 16 ms / 1000 per tick,
+        // its first tick lands 16 ms after press, and release drops any
+        // fraction: a 24 ms tap gets exactly one tick, and 75 makes that 1.2.
+        // Stock SCRL_* (speed 10) rounds to zero here.
         scroll_enc: scroll_encoder {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
-            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
-            tap-ms = <20>;
+            bindings = <&msc MOVE_Y(-75)>, <&msc MOVE_Y(75)>;
+            tap-ms = <24>;
         };
     };
 
