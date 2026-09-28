@@ -1,114 +1,129 @@
 /*
- * Cornix keymap matching the stock Jezail Funder firmware (the printed keycap
- * legends), ported from a Vial dump of the stock RMK build.
+ * Cornix keymap restored from the factory RMK firmware's storage
+ * (Vial-edited keymap read from flash 0xA0000 of the original left half).
  *
- * Stock RMK used KC_NO on every unassigned upper-layer key, and so does this,
- * except the left-hand modifiers (Shift, Ctrl, Cmd, Alt), which are
- * transparent wherever they are free so Shift can follow a held layer key.
- * Mute (left knob press) and middle click (right knob press)
- * sit on every layer, as they did in stock.
+ * Tap-hold keys reproduce RMK's default morse profile as it was stored:
+ * PermissiveHold (= ZMK balanced), 250 ms hold timeout, unilateral tap
+ * (a key on the same half resolves as tap, decided on its release),
+ * flow tap with 120 ms prior idle. RMK had no quick-tap, so none here.
  *
- * Position order follows default_transform in the board's cornix-layouts.dtsi:
- * left half left-to-right, then right half left-to-right; row 2 carries the
- * two knob presses between the halves.
+ * Layer 3 (BT) has no key reaching it, exactly as in the original.
+ *
+ * Position order follows default_transform in cornix-layouts.dtsi: left half,
+ * then right half; row 2 carries the two knob presses between the halves.
  */
+
+// Keep every behavior so ZMK Studio can assign any of them at runtime.
+#ifndef ZMK_BEHAVIORS_KEEP_ALL
+#define ZMK_BEHAVIORS_KEEP_ALL
+#endif
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/pointing.h>
 
-#define BASE  0
-#define NUM   1   // red dot, orange legends
-#define BT_R  2   // green dot, green legends
-#define LOWER 3   // green legends, same as BT_R
-#define RAISE 4   // empty in stock
-#define SPARE 5   // empty in stock, unreachable
+#define KEYS_L 0 1 2 3 4 5 12 13 14 15 16 17 24 25 26 27 28 29 30 38 39 40 41 42 43
+#define KEYS_R 6 7 8 9 10 11 18 19 20 21 22 23 31 32 33 34 35 36 37 44 45 46 47 48 49
 
-#define KNOBS &kp C_MUTE &mkp MCLK
 #define ENCODERS <&inc_dec_kp C_VOL_UP C_VOL_DN &scroll_enc>
 
 / {
     behaviors {
-        // One wheel click per detent. &msc sends speed * 16 ms / 1000 per tick,
-        // its first tick lands 16 ms after press, and release drops any
-        // fraction: a 24 ms tap gets exactly one tick, and 75 makes that 1.2.
-        // Stock SCRL_* (speed 10) rounds to zero here.
         scroll_enc: scroll_encoder {
             compatible = "zmk,behavior-sensor-rotate";
             #sensor-binding-cells = <0>;
-            bindings = <&msc MOVE_Y(-75)>, <&msc MOVE_Y(75)>;
-            tap-ms = <24>;
+            bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
+            tap-ms = <20>;
+        };
+        lt_l: layer_tap_left {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "Layer-Tap L";
+            bindings = <&mo>, <&kp>;
+            flavor = "balanced";
+            tapping-term-ms = <250>;
+            require-prior-idle-ms = <120>;
+            hold-trigger-key-positions = <KEYS_R>;
+            hold-trigger-on-release;
+        };
+        lt_r: layer_tap_right {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "Layer-Tap R";
+            bindings = <&mo>, <&kp>;
+            flavor = "balanced";
+            tapping-term-ms = <250>;
+            require-prior-idle-ms = <120>;
+            hold-trigger-key-positions = <KEYS_L>;
+            hold-trigger-on-release;
+        };
+        mt_l: mod_tap_left {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            display-name = "Mod-Tap L";
+            bindings = <&kp>, <&kp>;
+            flavor = "balanced";
+            tapping-term-ms = <250>;
+            require-prior-idle-ms = <120>;
+            hold-trigger-key-positions = <KEYS_R>;
+            hold-trigger-on-release;
         };
     };
 
     keymap {
         compatible = "zmk,keymap";
 
-        base {
+        layer_base {
             display-name = "Base";
             bindings = <
-&kp TAB   &kp Q    &kp W    &kp E   &kp R    &kp T                  &kp Y     &kp U    &kp I      &kp O    &kp P     &kp BSPC
-&kp CAPS  &kp A    &kp S    &kp D   &kp F    &kp G                  &kp H     &kp J    &kp K      &kp L    &kp BSLH  &kp RET
-&kp LSHFT &kp Z    &kp X    &kp C   &kp V    &kp B     KNOBS        &kp N     &kp M    &kp COMMA  &kp DOT  &kp UP    &kp FSLH
-&kp LCTRL &kp LGUI &kp LALT &mo NUM &mo LOWER &kp SPACE             &kp SPACE &mo RAISE &mo BT_R  &kp LEFT &kp DOWN  &kp RIGHT
+&kp TAB           &kp Q             &kp W             &kp E             &kp R             &kp T              &kp Y             &kp U             &kp I             &kp O             &kp P             &kp INT3
+&kp LSHFT         &kp A             &kp S             &kp D             &kp F             &kp G              &kp H             &kp J             &kp K             &kp L             &kp SEMI          &kp SQT
+&kp LSHFT         &kp Z             &kp X             &kp C             &kp V             &kp B              &kp C_MUTE        &mkp MCLK          &kp N             &kp M             &kp COMMA         &kp DOT           &kp FSLH          &kp MINUS
+&kp LGUI          &kp LCTRL         &kp LALT          &mt_l LALT LANG1  &lt_l 1 SPACE     &kp LANG2          &kp BSPC          &lt_r 2 RET       &mo 2             &none             &kp DEL           &kp ESC
             >;
             sensor-bindings = ENCODERS;
         };
 
-        num {
-            display-name = "Num";
+        layer_fn {
+            display-name = "Fn";
             bindings = <
-&kp ESC &kp N1 &kp N2 &kp N3 &kp N4   &kp N5                 &kp N6    &kp N7  &kp N8 &kp N9 &kp N0 &kp DEL
-&none   &none  &none  &none  &kp SEMI &kp MINUS              &kp EQUAL &kp SQT &none  &none  &none  &none
-&trans  &none  &none  &none  &none    &none      KNOBS       &none     &none   &none  &none  &none  &none
-&trans  &trans &trans &none  &none    &none                  &none     &none   &none  &none  &none  &none
+&kp F1            &kp F2            &kp F3            &kp F4            &kp F5            &kp F6             &kp F7            &kp F8            &kp F9            &kp F10           &kp F11           &kp F12
+&trans            &kp LC(LEFT)      &kp PG_UP         &kp UP            &kp PG_DN         &kp C_AC_BACK      &kp LC(PG_UP)     &none             &none             &none             &kp HOME          &kp END
+&trans            &kp LC(RIGHT)     &kp LEFT          &kp DOWN          &kp RIGHT         &kp C_AC_FORWARD   &kp C_MUTE        &mkp MCLK          &kp LC(PG_DN)     &kp LS(LA(UP))    &kp LS(LA(DOWN))  &kp LA(UP)        &kp LA(DOWN)      &none
+&trans            &trans            &none             &kp LALT          &none             &none              &none             &none             &none             &none             &none             &kp ESC
             >;
             sensor-bindings = ENCODERS;
         };
 
-        bt_r {
+        layer_sym {
+            display-name = "Sym";
+            bindings = <
+&trans               &kp LS(N1)           &kp LS(N2)           &kp LS(N3)           &kp LS(N4)           &kp LS(N8)            &kp LS(N9)           &kp N7               &kp N8               &kp N9               &kp LS(MINUS)        &kp LBKT
+&trans               &kp LS(N5)           &kp LS(N6)           &kp LS(N7)           &kp LS(LBKT)         &kp RBKT              &kp NON_US_HASH      &kp N4               &kp N5               &kp N6               &kp KP_PLUS          &kp KP_MULTIPLY
+&trans               &none                &none                &kp LS(INT1)         &kp EQUAL            &kp LS(RBKT)          &kp C_MUTE           &mkp MCLK             &kp LS(NON_US_HASH)  &kp N1               &kp N2               &kp N3               &kp N0               &none
+&trans               &none                &none                &none                &none                &none                 &none                &none                &none                &none                &none                &kp ESC
+            >;
+            sensor-bindings = ENCODERS;
+        };
+
+        layer_bt {
             display-name = "BT";
             bindings = <
-&none          &none &none &none &none &none              &none &none &none &none &none &none
-&bt BT_SEL 0   &none &none &none &none &none              &none &none &none &none &none &none
-&bt BT_SEL 1   &none &none &none &none &none   KNOBS      &none &none &none &none &none &none
-&bt BT_SEL 2   &trans &trans &none &none &none              &none &none &none &none &none &none
+&none         &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
+&bt BT_SEL 0  &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
+&bt BT_SEL 1  &none         &none         &none         &none         &none          &kp C_MUTE    &mkp MCLK      &none         &none         &none         &none         &none         &none
+&bt BT_SEL 2  &none         &none         &none         &none         &none          &none         &none         &none         &none         &none         &none
             >;
             sensor-bindings = ENCODERS;
         };
 
-        lower {
-            display-name = "Lower";
-            bindings = <
-&none          &none &none &none &none &none              &none &none &none &none &none &none
-&bt BT_SEL 0   &none &none &none &none &none              &none &none &none &none &none &none
-&bt BT_SEL 1   &none &none &none &none &none   KNOBS      &none &none &none &none &none &none
-&bt BT_SEL 2   &trans &trans &none &none &none              &none &none &none &none &none &none
-            >;
-            sensor-bindings = ENCODERS;
+        // Spare slots so layers can be added from ZMK Studio.
+        extra1 {
+            status = "reserved";
         };
-
-        raise {
-            display-name = "Raise";
-            bindings = <
-&none &none &none &none &none &none              &none &none &none &none &none &none
-&none &none &none &none &none &none              &none &none &none &none &none &none
-&trans &none &none &none &none &none   KNOBS      &none &none &none &none &none &none
-&trans &trans &trans &none &none &none              &none &none &none &none &none &none
-            >;
-            sensor-bindings = ENCODERS;
-        };
-
-        spare {
-            display-name = "Spare";
-            bindings = <
-&none &none &none &none &none &none              &none &none &none &none &none &none
-&none &none &none &none &none &none              &none &none &none &none &none &none
-&trans &none &none &none &none &none   KNOBS      &none &none &none &none &none &none
-&trans &trans &trans &none &none &none              &none &none &none &none &none &none
-            >;
-            sensor-bindings = ENCODERS;
+        extra2 {
+            status = "reserved";
         };
     };
 };
