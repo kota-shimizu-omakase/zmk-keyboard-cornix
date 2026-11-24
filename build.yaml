@@ -4,6 +4,9 @@
 include:
   - board: cornix_left//zmk
     shield: raw_hid_adapter cornix_indicator
+    # ZMK Studio over USB (CDC ACM serial) in addition to Bluetooth, so the
+    # keymap can be edited at zmk.studio while the left half is plugged in.
+    snippet: studio-rpc-usb-uart
     cmake-args: -DDTS_EXTRA_CPPFLAGS=-DZMK_BEHAVIORS_KEEP_ALL
     artifact-name: cornix_left_default_nosd
 
